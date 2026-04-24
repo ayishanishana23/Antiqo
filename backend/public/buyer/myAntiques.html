@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Antiques - Antiqo</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+
+  <style>
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background:#0d0d0d;
+      color:white;
+    }
+
+   
+
+     h2{
+      color:#d4af37;    
+    }
+
+    .back-btn{
+      background:#d4af37;
+      border:none;
+      padding:8px 14px;
+      border-radius:5px;
+      cursor:pointer;
+      font-weight:bold;
+    }
+
+    .container{
+      padding:30px;
+    }
+
+    .antique-card{
+      display:flex;
+      gap:20px;
+      background:#1a1a1a;
+      border:1px solid #d4af37;
+      border-radius:10px;
+      padding:15px;
+      margin-bottom:20px;
+      align-items:center;
+    }
+
+    .antique-image{
+      width:140px;
+      height:140px;
+      object-fit:cover;
+      border-radius:8px;
+      border:2px solid #d4af37;
+    }
+
+    .antique-details{
+      flex:1;
+    }
+
+    .antique-details h3{
+      color:#d4af37;
+      margin-bottom:10px;
+    }
+
+    .antique-details p{
+      margin:4px 0;
+      font-size:14px;
+    }
+
+    .status{
+      margin-top:8px;
+      font-weight:bold;
+      color:#4caf50;
+    }
+
+    .empty{
+      text-align:center;
+      margin-top:80px;
+      color:#aaa;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- Add at the bottom of <body> -->
+<div id="antiqueModal"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:999; 
+            align-items:center; justify-content:center; overflow:auto; padding:20px;">
+  <div style="background:#111; padding:20px; border-radius:10px; max-width:500px; width:90%; color:white; border:1px solid #d4af37;">
+    <h2 id="modalTitle" style="color:#d4af37; text-align:center;">Antique Details</h2>
+    <div id="antiqueDetails"></div>
+    <div style="text-align:center; margin-top:15px;">
+      <button onclick="closeModal()" style="padding:8px 18px;background:#d4af37;border:none;border-radius:5px;cursor:pointer;">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<h2 >My Antiques</h2>
+<div class="container">
+
+  <div id="antiqueList"></div>
+
+  <div id="emptyMessage" class="empty" style="display:none">
+    <h3>No Antiques Owned Yet</h3>
+    <p>You currently don’t own any antiques.</p>
+  </div>
+
+</div>
+
+
+<script>
+
+
+async function loadAntiques(){
+
+const token = window.token || localStorage.getItem("token");
+
+const res = await fetch("/api/antique/my-antiques",{
+headers:{
+Authorization:"Bearer "+token
+}
+});
+
+const antiques = await res.json();
+
+const container = document.getElementById("antiqueList");
+const empty = document.getElementById("emptyMessage");
+
+container.innerHTML="";
+
+if(!antiques || antiques.length === 0){
+empty.style.display="block";
+return;
+}
+
+// Add/replace your loadAntiques() click handler
+antiques.forEach(a => {
+  const card = document.createElement("div");
+  card.className = "antique-card";
+  card.innerHTML = `
+    <img src="${a.imageUrl || '/images/no-image.png'}" class="antique-image"/>
+    <div class="antique-details">
+      <h3>${a.name}</h3>
+      <p><b>Category:</b> ${a.category || "Unknown"}</p>
+      <p><b>Origin:</b> ${a.origin || "Unknown"}</p>
+      <p><b>Age:</b> ${a.age || "-" } years</p>
+      <p><b>Description:</b> ${a.description || "No description"}</p>
+     <p class="status">Status: ${a.status || "Pending"}</p>
+
+${a.status === "Approved" ? `
+<p style="margin-top:6px;">
+<b>Sale:</b> 
+<span style="color:${a.isForSale ? '#4caf50' : '#ff4444'}">
+${a.isForSale ? "For Sale" : "Not For Sale"}
+</span>
+</p>
+<button onclick="toggleSale(event,'${a._id}',${a.isForSale})"
+style="margin-top:8px;padding:6px 12px;background:#d4af37;border:none;border-radius:5px;cursor:pointer;">
+${a.isForSale ? "Remove From Sale" : "List For Sale"}
+</button>
+` : ``}
+    </div>
+  `;
+  card.style.cursor = "pointer";
+
+  card.addEventListener("click", () => {
+    showAntiqueDetailsOwner(a);
+  });
+
+  container.appendChild(card);
+});
+
+// Modal function
+function showAntiqueDetailsOwner(a) {
+  const container = document.getElementById("antiqueDetails");
+  const modalTitle = document.getElementById("modalTitle");
+  
+  modalTitle.innerText = a.name;
+
+  if(a.status === "Approved") {
+    container.innerHTML = `
+      <div style="display:flex; gap:15px; flex-wrap:wrap; justify-content:center; margin-bottom:15px;">
+        <img src="${a.imageUrl}" style="width:150px;height:150px;object-fit:cover;border-radius:8px;border:2px solid #d4af37;">
+        ${a.qrCode ? `<div style="text-align:center;">
+          <img src="${a.qrCode}" width="150" height="150"><br>
+          <a href="${a.qrCode}" download="${a.serialId}_QR.png" style="color:#d4af37;text-decoration:underline;margin-top:5px;display:inline-block;">Download QR</a>
+        </div>` : ''}
+      </div>
+      <p><b>Category:</b> ${a.category || "Unknown"}</p>
+      <p><b>Origin:</b> ${a.origin || "Unknown"}</p>
+      <p><b>Age:</b> ${a.age || "-" } years</p>
+      <p><b>Description:</b> ${a.description || "No description"}</p>
+      <p><b>Serial ID:</b> ${a.serialId || "N/A"}</p>
+      <p><b>Transaction Hash:</b> <span style="font-size:12px;">${a.txHash || "N/A"}</span></p>
+      <p><b>Verified At:</b> ${a.verifiedAt ? new Date(a.verifiedAt).toLocaleString() : "N/A"}</p>
+    `;
+  } else if(a.status === "Pending") {
+    container.innerHTML = `<p style="text-align:center;color:#ffa500;font-weight:bold;">Admin approval pending for this antique.</p>`;
+  } else if(a.status === "Rejected") {
+    container.innerHTML = `<p style="text-align:center;color:red;font-weight:bold;">Admin rejected this antique.</p>`;
+  }
+
+  document.getElementById("antiqueModal").style.display = "flex";
+}
+
+
+}
+
+async function toggleSale(event,id,currentStatus){
+
+event.stopPropagation(); // prevent card click
+
+const token = localStorage.getItem("token");
+
+try{
+
+const endpoint = currentStatus
+? `/api/antique/remove-sale/${id}`
+: `/api/antique/list-for-sale/${id}`;
+
+const res = await fetch(endpoint,{
+method:"PUT",
+headers:{
+Authorization:"Bearer "+token
+}
+});
+
+const data = await res.json();
+
+if(!res.ok) throw new Error(data.message);
+
+alert(data.message);
+
+loadAntiques(); // refresh list
+
+}catch(err){
+
+console.error(err);
+alert("Failed to update sale status");
+
+}
+
+}
+function closeModal() {
+  document.getElementById("antiqueModal").style.display = "none";
+}
+  
+loadAntiques()
+
+</script>
+
+</body>
+</html>

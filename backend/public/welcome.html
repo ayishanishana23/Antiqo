@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Antiqo</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+
+    .btn {
+  padding: 10px 25px;
+  margin: 10px;
+  border: none;
+  border-radius: 40px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Get Started Button – Gradient Gold */
+.btn-get-started {
+  background: linear-gradient(135deg, #d4af37, #d4af37);
+  color: black;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.btn-get-started:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(135deg, #d4af37, #d4af37);
+}
+
+/* Register Button – Transparent Gold Outline */
+.btn-register {
+  background: transparent;
+  border: 3px solid #d4af37;
+  color: #d4af37;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.btn-register:hover {
+  transform: translateY(-3px) scale(1.05);
+  background: #d4af37;
+  color: black;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+
+.approved-antiques-section {
+    padding: 100px;
+   
+    text-align: center;
+  }
+
+  .approved-antiques-section h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #d4af37;
+  }
+
+ .antiques-container {
+  display: grid;
+  grid-template-rows: repeat( minmax(180px, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.antique-card {
+  background-color: #1c1c1c;
+  border-radius: 12px;
+  padding: 10px;
+  color: #f5f5f5;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.antique-card:hover {
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+}
+
+.antique-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+
+    /* ================= HEADER ================= */
+    header {
+      background-color: #1c1c1c;
+      color: #d4af37;
+      padding: 20px 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    nav a {
+      color: #f5f5f5;
+      text-decoration: none;
+      margin-left: 25px;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+
+    nav a:hover {
+      color: #d4af37;
+    }
+
+    .btn-get-started {
+      background-color: #d4af37;
+      color: black;
+    }
+
+    .btn-get-started:hover {
+      background-color: #b8962e;
+    }
+    .extra-info {
+      margin-top: 30px;
+      font-size: 18px;
+      line-height: 1.6;
+      color: #f5f5f5;
+    }
+
+    /* ================= HERO SECTION ================= */
+    .hero {
+      flex: 1;
+      position: relative;
+      background: url("/images/antique-bg.jpg") no-repeat center center/cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: white;
+    }
+
+    .glass-layer {
+      position: relative;
+      z-index: 2;
+
+      width: 100%;
+      height: 100%;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+
+    /* Transparent Sheet */
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.65);
+      z-index: 1;
+      /* adjust transparency here */
+    }
+
+    .content {
+
+      max-width: 800px;
+      padding: 40px;
+      color: white;
+    }
+
+
+    .content h1 {
+      padding: 70px;
+      font-size: 58px;
+      margin-bottom: 20px;
+      color: #d4af37;
+      letter-spacing: 2px;
+    }
+
+    .content p {
+      font-size: 18px;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .logo {
+      height: 50px;
+      width: 150px;
+      /* adjust width */
+      overflow: hidden;
+      /* hides extra parts */
+      display: flex;
+      align-items: center;
+    }
+
+    .logo img {
+      height: 100%;
+      object-fit: contain;
+    }
+
+
+    /* ================= SEARCH ================= */
+    .search-box input {
+      padding: 12px;
+      width: 250px;
+      border: none;
+      border-radius: 5px;
+      outline: none;
+    }
+
+    .search-box button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #d4af37;
+      color: black;
+      cursor: pointer;
+      margin-left: 5px;
+      font-weight: bold;
+    }
+
+
+    .qr-btn {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #b8860b;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+
+    /* ================= FOOTER ================= */
+    footer {
+      background-color: #1c1c1c;
+      color: #d4af37;
+      text-align: center;
+      padding: 15px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+
+<script>
+  const container = document.getElementById("antiquesContainer");
+document.addEventListener("DOMContentLoaded", () => {
+  const container = document.getElementById("antiquesContainer");
+
+  fetch("/api/antique/approved")
+    .then(res => res.json())
+    .then(data => {
+      data.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "antique-card";
+        card.innerHTML = `
+          <img src="${item.imageUrl}" alt="${item.name}">
+          <h3>${item.name}</h3>
+         
+        `;
+        container.appendChild(card);
+      });
+    })
+    .catch(err => {
+      console.error("Failed to load approved antiques:", err);
+      container.innerHTML = "<p>Failed to load antiques.</p>";
+    });
+});
+</script>
+
+
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="logo"><img src="/images/logo.png" alt="Antiqo Logo"></div>
+    <nav>
+      <a href="#">About Us</a>
+      <a href="/login.html">Login</a>
+      <a href="/register.html">Register</a>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <div class="hero">
+
+    <div class="overlay"></div>
+
+    <div class="glass-layer">
+      <div class="content">
+        <h1>Antiqo</h1>
+        <p>
+          Antique Verification System<br>
+          Secure Blockchain-Based Authentication for Antique Ownership & Verification
+        </p>
+
+        
+        <p>
+          Explore a secure, transparent way to verify antique ownership. <br>
+          Join thousands of collectors trusting Antiqo for blockchain-verified antiques.
+      </p>
+
+        <div>
+          <button class="btn btn-get-started" onclick="window.location.href='/login.html'">Get Started</button>
+          <button class="btn btn-register" onclick="window.location.href='/register.html'">Register</button>
+        </div>
+
+        
+
+
+
+          <!-- Admin Approved Antique List Section -->
+<div class="approved-antiques-section">
+  <h2>Antiques</h2>
+  <div class="antiques-container" id="antiquesContainer">
+    <!-- Antique cards will be injected here -->
+  </div>
+</div>
+      </div>
+    </div>
+
+  </div>
+  <!-- Footer -->
+  <footer>
+
+<h3>Contact Antiqo Team</h3>
+
+<p>Email: support@antiqo.com</p>
+
+<p>Phone: +91 98765 43210</p>
+
+<p>Address: Antiqo Technologies, Infopark Campus, Kochi, Kerala, India</p>
+
+<p>© Antiqo </p>
+
+</footer>
+</body>
+
+</html>

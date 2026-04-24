@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Admin Dashboard - Antiqo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      background: #1c1c1c;
+      color: #d4af37;
+      padding: 20px 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo img {
+      height: 50px;
+    }
+
+    nav button {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 5px;
+      background: #d4af37;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    nav button:hover {
+      background: #b8962e;
+    }
+
+    /* HERO */
+    .hero-bg {
+      flex: 1;
+      background: url("/images/antique-bg.jpg") no-repeat center/cover;
+      position: relative;
+      padding: 40px 20px;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, .65);
+    }
+
+    /* DASHBOARD */
+    .dashboard {
+      position: relative;
+      z-index: 2;
+      max-width: 1000px;
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      color: white;
+    }
+
+    .section {
+      flex: 1;
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid rgba(212, 175, 55, .3);
+      border-radius: 12px;
+      padding: 20px;
+      max-height: 65vh;
+      overflow-y: auto;
+    }
+
+    .section h2 {
+      color: #d4af37;
+      text-align: center;
+      border-bottom: 1px solid rgba(212, 175, 55, .4);
+      padding-bottom: 6px;
+      margin-bottom: 15px;
+    }
+
+    .card {
+      background: rgba(0, 0, 0, .55);
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .Pending {
+      background: #555;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    /* BUTTONS */
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .approve {
+      background: #d4af37;
+      color: black;
+    }
+
+    .reject {
+      background: #c0392b;
+      color: white;
+    }
+
+    .delete {
+      background: #555;
+      color: white;
+    }
+
+    .approve:hover {
+      background: #b8962e;
+    }
+
+    .reject:hover {
+      background: #962d22;
+    }
+
+    .delete:hover {
+      background: #333;
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .7);
+      z-index: 100;
+    }
+
+    .modal-card {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 900px;
+      height: 80vh;
+      background: #111;
+      color: white;
+      border-radius: 12px;
+      border: 2px solid #d4af37;
+      z-index: 101;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    .modal-image {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-image img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 10px;
+      border: 2px solid #d4af37;
+      background: black;
+    }
+
+    .modal-details {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-content {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .modal-details h3 {
+      color: #d4af37;
+      margin-bottom: 10px;
+    }
+
+    .modal-details textarea {
+      width: 100%;
+      margin-top: 10px;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      resize: none;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 15px 20px;
+      border-top: 1px solid rgba(212, 175, 55, .3);
+    }
+
+    footer {
+      background: #1c1c1c;
+      color: #d4af37;
+      text-align: center;
+      padding: 15px;
+    }
+
+    /* ================= USER MODEL SIZE OVERRIDE ================= */
+    .user-model {
+      max-width: 520px;
+      /* smaller width */
+      height: auto;
+      /* no fixed height */
+      max-height: 65vh;
+      /* compact popup */
+    }
+
+    /* User model body single column */
+    .user-model .model-body {
+      grid-template-columns: 1fr;
+      height: auto;
+    }
+
+    /* Reduce padding slightly */
+    .user-model .model-body {
+      padding: 15px;
+    }
+
+    /* Keep buttons visible & neat */
+    .user-model .model-actions {
+      padding: 12px 15px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="logo"><img src="/images/logo.png"></div>
+    <nav>
+      <button onclick="goRecords()">View Records</button>
+      <button onclick="logout()">Logout</button>
+    </nav>
+  </header>
+
+  <div class="hero-bg">
+    <div class="overlay"></div>
+
+    <div class="dashboard">
+      <div class="section">
+        <h2>User Approvals</h2>
+        <div id="pendingUsers">Loading...</div>
+      </div>
+
+      <div class="section">
+        <h2>Antique Approvals</h2>
+        <div id="pendingAntiques">Loading...</div>
+      </div>
+
+      <div class="section">
+        <h2>Ownership Requests</h2>
+        <div id="pendingOwnerships">Loading...</div>
+      </div>
+
+
+    </div>
+  </div>
+
+  <footer>© Antiqo – Antique Verification System</footer>
+
+  <script>
+    const token = localStorage.getItem("token");
+    if (!token) location.href = "/login.html";
+
+    let selectedAntiqueId = null;
+    let selectedUserId = null;
+
+    /* ================= USERS ================= */
+    async function loadPendingUsers() {
+      const r = await fetch("/api/admin/pending-users", { headers: { Authorization: "Bearer " + token } });
+      const users = await r.json();
+      pendingUsers.innerHTML = users.length ? "" : "No pending users";
+
+      users.forEach(u => {
+        pendingUsers.innerHTML += `
+      <div class="card" onclick='openUserModal(${JSON.stringify(u)})'>
+        <span><b>${u.name}</b> (${u.role})</span>
+        <span class="Pending">Pending</span>
+      </div>`;
+      });
+    }
+
+    function openUserModal(u) {
+      selectedUserId = u._id;
+      userName.innerText = u.name;
+      userEmail.innerText = u.email;
+      userRole.innerText = u.role;
+      userCreated.innerText = new Date(u.createdAt).toLocaleString();
+      userModal.style.display = "block";
+    }
+    function closeUserModal() { userModal.style.display = "none"; }
+
+    async function approveUser() {
+      await fetch("/api/admin/approve-user/" + selectedUserId, { method: "PUT", headers: { Authorization: "Bearer " + token } });
+      closeUserModal(); loadPendingUsers();
+    }
+    async function rejectUser() {
+      await fetch("/api/admin/reject-user/" + selectedUserId, { method: "DELETE", headers: { Authorization: "Bearer " + token } });
+      closeUserModal(); loadPendingUsers();
+    }
+
+    /* ================= ANTIQUES ================= */
+    async function loadPendingAntiques() {
+      const r = await fetch("/api/admin/pending-antiques", { headers: { Authorization: "Bearer " + token } });
+      const d = await r.json();
+      pendingAntiques.innerHTML = d.length ? "" : "No pending antiques";
+
+      d.forEach(a => {
+        pendingAntiques.innerHTML += `
+      <div class="card" onclick="openAntique('${a._id}')">
+        <span><b>${a.name}</b> (Owner: ${a.owner?.name || "N/A"})</span>
+        <span class="Pending">Pending</span>
+      </div>`;
+      });
+    }
+
+    async function openAntique(id) {
+
+      const r = await fetch("/api/admin/pending-antiques", {
+        headers: { Authorization: "Bearer " + token }
+      });
+
+      const antiques = await r.json();
+
+      const a = antiques.find(x => x._id === id);
+
+      if (!a) return;
+
+      selectedAntiqueId = id;
+
+      /* BASIC INFO */
+
+      modalTitle.innerText = a.name || "-";
+      modalDescription.innerText = a.description || "No description";
+      modalCategory.innerText = a.category || "-";
+      modalOrigin.innerText = a.origin || "-";
+      modalManufacture.innerText = a.manufactureDate
+        ? new Date(a.manufactureDate).toDateString()
+        : "-";
+      modalAge.innerText = a.age || "-";
+      modalMaterial.innerText = a.material || "-";
+      modalCondition.innerText = a.condition || "-";
+      modalPeriod.innerText = a.historicalPeriod || "-";
+      modalValue.innerText = a.estimatedValue || "-";
+      modalCurrency.innerText = a.currency || "";
+      modalTags.innerText = a.tags || "-";
+      modalOwner.innerText = a.owner?.name || "N/A";
+      modalEmail.innerText = a.owner?.email || "N/A";
+      modalImage.src = a.imageUrl;
+      /* DOCUMENT LINKS */
+
+      modalArchaeology.href = a.documents?.archaeologyCertificate
+  ? window.location.origin + a.documents.archaeologyCertificate
+  : "#";
+
+modalLabTest.href = a.documents?.labTestReport
+  ? window.location.origin + a.documents.labTestReport
+  : "#";
+
+modalInvoice.href = a.documents?.purchaseInvoice
+  ? window.location.origin + a.documents.purchaseInvoice
+  : "#";
+
+modalOwnershipProof.href = a.documents?.previousOwnershipProof
+  ? window.location.origin + a.documents.previousOwnershipProof
+  : "#";
+      /* IMAGES */
+
+      const imgContainer = document.getElementById("modalImages");
+      imgContainer.innerHTML = "";
+
+      if (a.images && a.images.length) {
+
+        a.images.forEach(img => {
+
+          imgContainer.innerHTML += `
+      <img src="${window.location.origin + img}"
+      style="width:100px;height:100px;object-fit:cover;border:2px solid #d4af37;border-radius:6px;">
+    `;
+
+        });
+
+      }
+      antiqueModal.style.display = "block";
+
+    }
+    function closeModal() { antiqueModal.style.display = "none"; }
+
+    async function approveFromModal() {
+      if (!confirm("Approve this antique?")) return;
+      await fetch("/api/admin/verify-antique/" + selectedAntiqueId, { method: "PUT", headers: { Authorization: "Bearer " + token } });
+      closeModal(); loadPendingAntiques();
+    }
+    async function rejectFromModal() {
+      const reason = prompt("Enter rejection reason:");
+      await fetch("/api/admin/reject-antique/" + selectedAntiqueId, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+        body: JSON.stringify({ reason })
+      });
+      closeModal(); loadPendingAntiques();
+    }
+    async function loadOwnershipRequests() {
+
+      const res = await fetch("/api/admin/pending-ownership-requests", {
+        headers: { Authorization: "Bearer " + token }
+      });
+
+      const requests = await res.json();
+
+      const container = document.getElementById("pendingOwnerships");
+
+      container.innerHTML = requests.length ? "" : "No ownership requests";
+
+      requests.forEach(r => {
+
+        container.innerHTML += `
+      <div class="card" onclick='openOwnershipModal(${JSON.stringify(r)})'>
+        <span>
+          <b>${r.antique?.name || "Antique"}</b><br>
+          ${r.owner?.name} → ${r.buyer?.name}
+        </span>
+        <span class="Pending">Pending</span>
+      </div>
+    `;
+
+      });
+
+    }
+    let selectedOwnershipRequest = null;
+
+    function openOwnershipModal(r) {
+
+      selectedOwnershipRequest = r;
+
+      ownershipAntique.innerText = r.antique?.name || "-";
+      ownershipSerial.innerText = r.antique?.serialId || "-";
+
+      ownerName.innerText = r.owner?.name || "-";
+      ownerEmail.innerText = r.owner?.email || "-";
+
+      buyerName.innerText = r.buyer?.name || "-";
+      buyerEmail.innerText = r.buyer?.email || "-";
+
+      ownershipModal.style.display = "block";
+    }
+
+    function closeOwnershipModal() {
+      ownershipModal.style.display = "none";
+    }
+
+
+    async function adminOwnership(requestId, approve) {
+
+      if (!confirm(approve ? "Approve ownership transfer?" : "Reject ownership transfer?"))
+        return;
+
+      const res = await fetch("/api/admin/ownership-request/admin-response", {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token
+        },
+
+        body: JSON.stringify({
+          requestId,
+          approve
+        })
+
+      });
+
+      const data = await res.json();
+
+      alert(data.message);
+
+      closeOwnershipModal();
+      loadOwnershipRequests();
+
+    }
+
+    function logout() { localStorage.removeItem("token"); location.href = "/login.html"; }
+    function goRecords() { location.href = "/admin/records.html"; }
+
+    loadPendingUsers();
+    loadPendingAntiques();
+    loadOwnershipRequests()
+  </script>
+
+  <!-- USER MODAL -->
+  <div id="userModal" style="display:none;">
+    <div class="modal-overlay" onclick="closeUserModal()"></div>
+    <div class="modal-card user-model">
+      <div class="modal-body">
+        <div class="modal-details" style="grid-column:1/-1;">
+          <div class="modal-content">
+            <h3 id="userName"></h3>
+            <p><b>Email:</b> <span id="userEmail"></span></p>
+            <p><b>Role:</b> <span id="userRole"></span></p>
+            <p><b>Joined:</b> <span id="userCreated"></span></p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="approve" onclick="approveUser()">Approve</button>
+        <button class="reject" onclick="rejectUser()">Reject</button>
+        <button class="delete" onclick="closeUserModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANTIQUE MODAL -->
+  <div id="antiqueModal" style="display:none;">
+    <div class="modal-overlay" onclick="closeModal()"></div>
+    <div class="modal-card">
+      <div class="modal-body">
+        <div class="modal-image"><img id="modalImage"></div>
+        <div class="modal-details">
+          <div class="modal-content">
+
+            <h3 id="modalTitle"></h3>
+
+            <p><b>Category:</b> <span id="modalCategory"></span></p>
+
+            <p><b>Description:</b></p>
+            <p id="modalDescription"></p>
+
+            <p><b>Origin:</b> <span id="modalOrigin"></span></p>
+
+            <p><b>Manufacture Date:</b> <span id="modalManufacture"></span></p>
+
+            <p><b>Age:</b> <span id="modalAge"></span> years</p>
+
+            <p><b>Material:</b> <span id="modalMaterial"></span></p>
+
+            <p><b>Condition:</b> <span id="modalCondition"></span></p>
+
+            <p><b>Historical Period:</b> <span id="modalPeriod"></span></p>
+
+            <p><b>Estimated Value:</b>
+              <span id="modalValue"></span>
+              <span id="modalCurrency"></span>
+            </p>
+
+            <p><b>Tags:</b> <span id="modalTags"></span></p>
+
+            <hr style="margin:10px 0;border:1px solid #444">
+
+            <p><b>Owner:</b> <span id="modalOwner"></span></p>
+
+            <p><b>Email:</b> <span id="modalEmail"></span></p>
+
+            <hr style="margin:10px 0;border:1px solid #444">
+
+            <h4 style="color:#d4af37;">Verification Documents</h4>
+
+            <p>
+              <b>Archaeology Certificate:</b>
+              <a id="modalArchaeology" target="_blank" style="color:#d4af37;">View</a>
+            </p>
+
+            <p>
+              <b>Lab Test Report:</b>
+              <a id="modalLabTest" target="_blank" style="color:#d4af37;">View</a>
+            </p>
+
+            <p>
+              <b>Purchase Invoice:</b>
+              <a id="modalInvoice" target="_blank" style="color:#d4af37;">View</a>
+            </p>
+
+            <p>
+              <b>Previous Ownership Proof:</b>
+              <a id="modalOwnershipProof" target="_blank" style="color:#d4af37;">View</a>
+            </p>
+
+            <hr style="margin:10px 0;border:1px solid #444">
+
+            <h4 style="color:#d4af37;">Antique Images</h4>
+
+            <div id="modalImages" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
+            <textarea id="rejectReason" placeholder="Rejection reason (optional)"></textarea>
+
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="approve" onclick="approveFromModal()">Approve</button>
+        <button class="reject" onclick="rejectFromModal()">Reject</button>
+        <button class="delete" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OWNERSHIP REQUEST MODAL -->
+
+  <div id="ownershipModal" style="display:none;">
+
+    <div class="modal-overlay" onclick="closeOwnershipModal()"></div>
+
+    <div class="modal-card user-model">
+
+      <div class="modal-body">
+
+        <div class="modal-details" style="grid-column:1/-1;">
+          <div class="modal-content">
+
+            <h3>Ownership Transfer Request</h3>
+
+            <p><b>Antique:</b> <span id="ownershipAntique"></span></p>
+            <p><b>Serial ID:</b> <span id="ownershipSerial"></span></p>
+
+            <hr>
+
+            <p><b>Current Owner:</b> <span id="ownerName"></span></p>
+            <p><b>Owner Email:</b> <span id="ownerEmail"></span></p>
+
+            <hr>
+
+            <p><b>Buyer:</b> <span id="buyerName"></span></p>
+            <p><b>Buyer Email:</b> <span id="buyerEmail"></span></p>
+
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+        <button class="approve" onclick="adminOwnership(selectedOwnershipRequest._id, true)">
+          Approve
+        </button>
+
+        <button class="reject" onclick="adminOwnership(selectedOwnershipRequest._id, false)">
+          Reject
+        </button><button class="delete" onclick="closeOwnershipModal()">Cancel</button>
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+
+</html>

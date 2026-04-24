@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Add Antique - Antiqo</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: #111;
+        }
+
+        .form-box {
+            width: 600px;
+            max-width: 95%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #d4af37;
+            border-radius: 12px;
+            padding: 30px;
+            color: white;
+            margin: 40px auto;
+        }
+
+        h2 {
+            text-align: center;
+            color: #d4af37;
+            margin-bottom: 20px;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        label {
+            font-size: 13px;
+            color: #ccc;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: #d4af37;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .cancel-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: #444;
+            color: white;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        #imagePreview {
+            display: none;
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-box">
+        <h2>Add Antique</h2>
+        <form id="antiqueForm" enctype="multipart/form-data">
+            <label>Antique Name *</label>
+            <input type="text" name="name" required placeholder="Antique Name">
+            <label>Description</label>
+            <textarea name="description" placeholder="Description"></textarea>
+            <label>Category *</label>
+            <select name="category" required>
+                <option value="">Select Category</option>
+                <option>Coin</option>
+                <option>Painting</option>
+                <option>Sculpture</option>
+                <option>Jewelry</option>
+                <option>Furniture</option>
+                <option>Manuscript</option>
+                <option>Weapon</option>
+                <option>Other</option>
+            </select>
+            <label>Origin *</label>
+            <input type="text" name="origin" required placeholder="Origin">
+            <label>Manufacture Date *</label>
+            <input type="date" name="manufactureDate" id="manufactureDate" required>
+            <label>Approximate Age (Years) *</label>
+            <input type="number" name="age" id="ageInput" required placeholder="eg. 100" min="1">
+            <label>Material *</label>
+            <select id="materialSelect" name="material" required>
+                <option value="">Select Material</option>
+                <option>Bronze</option>
+                <option>Gold</option>
+                <option>Silver</option>
+                <option>Wood</option>
+                <option>Brass</option>
+                <option>Stone</option>
+                <option>Ceramic</option>
+                <option>Iron</option>
+                <option>Other</option>
+            </select>
+            <input type="text" id="customMaterial" placeholder="Enter custom material" style="display:none">
+            <label>Condition *</label>
+            <select name="condition" required>
+                <option>Excellent</option>
+                <option>Good</option>
+                <option>Fair</option>
+                <option>Damaged</option>
+            </select>
+            <label>Historical Period</label>
+            <input type="text" name="historicalPeriod" placeholder="eg. Victorian Era">
+            <label>Estimated Value</label>
+            <input type="number" name="estimatedValue" placeholder="Enter value" min="1">
+            <label>Currency *</label>
+            <select id="currencySelect" name="currency" required>
+                <option value="INR">INR</option>
+                <option>USD</option>
+                <option>EUR</option>
+                <option>GBP</option>
+                <option>Other</option>
+            </select>
+            <input type="text" id="customCurrency" placeholder="Enter currency" style="display:none">
+            <label>Tags (comma separated)</label>
+            <input type="text" name="tags" placeholder="eg. coin, mughal">
+            <label>Upload Image *</label>
+            <input type="file" name="image" id="imageInput" accept="image/*" required>
+            <img id="imagePreview">
+
+            <h3>Upload Verification Documents</h3>
+
+            <label>Archaeology Certificate</label>
+            <input type="file" name="archaeologyCertificate">
+
+            <label>Lab Test Report</label>
+            <input type="file" name="labTestReport">
+
+            <label>Purchase Invoice</label>
+            <input type="file" name="purchaseInvoice">
+
+            <label>Previous Ownership Proof</label>
+            <input type="file" name="previousOwnershipProof">
+
+            <label>Antique Images</label>
+            <input type="file" name="images" multiple>
+            <button type="submit" class="submit-btn">
+                Submit for Verification
+            </button>
+            <button type="button" class="cancel-btn" onclick="goDashboard()">
+                Cancel
+            </button>
+        </form>
+    </div>
+    <script>
+        /* INIT FUNCTION (works inside dashboard SPA) */
+        initAddAntique();
+        function initAddAntique() {
+            const token = window.token || localStorage.getItem("token");
+            if (!token) {
+                alert("Please login first");
+                window.location.href = "/login.html";
+            }
+            const form = document.getElementById("antiqueForm");
+            const fileInput = document.getElementById("imageInput");
+            const preview = document.getElementById("imagePreview");
+            const manufactureInput = document.getElementById("manufactureDate");
+            const ageInput = document.getElementById("ageInput");
+            const materialSelect = document.getElementById("materialSelect");
+            const customMaterial = document.getElementById("customMaterial");
+            const currencySelect = document.getElementById("currencySelect");
+            const customCurrency = document.getElementById("customCurrency");
+            /* IMAGE PREVIEW */
+            fileInput.addEventListener("change", function () {
+                const file = this.files[0];
+                if (file) {
+                    preview.src = URL.createObjectURL(file);
+                    preview.style.display = "block";
+                }
+            });
+            /* MATERIAL CUSTOM */
+            materialSelect.addEventListener("change", function () {
+                if (this.value === "Other") {
+                    customMaterial.style.display = "block";
+                } else {
+                    customMaterial.style.display = "none";
+                }
+            });
+            /* CURRENCY CUSTOM */
+            currencySelect.addEventListener("change", function () {
+                if (this.value === "Other") {
+                    customCurrency.style.display = "block";
+                } else {
+                    customCurrency.style.display = "none";
+                }
+            });
+            /* BLOCK FUTURE DATE */
+            const today = new Date().toISOString().split("T")[0];
+            manufactureInput.setAttribute("max", today);
+            /* SUBMIT */
+            form.addEventListener("submit", async function (e) {
+                e.preventDefault();
+                let materialVal = materialSelect.value === "Other"
+                    ? customMaterial.value.trim()
+                    : materialSelect.value;
+                let currencyVal = currencySelect.value === "Other"
+                    ? customCurrency.value.trim()
+                    : currencySelect.value;
+                const formData = new FormData(form);
+                formData.set("material", materialVal);
+                formData.set("currency", currencyVal);
+                try {
+                    const res = await fetch("/api/antique/register", {
+                        method: "POST",
+                        headers: {
+                            Authorization: "Bearer " + token
+                        },
+                        body: formData
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        alert("Antique submitted for admin verification");
+                        window.location.href = "/owner/ownerhome.html";
+                    } else {
+                        alert(data.message || "Submission failed");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("Server connection error");
+                }
+            });
+        }
+        function goDashboard() {
+            window.location.href = "/owner/ownerhome.html";
+        }
+    </script>
+</body>
+
+</html>

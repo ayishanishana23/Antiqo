@@ -1,0 +1,256 @@
+<html>
+<head>
+  <title>Antique Public Verification - Antiqo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- QR Library -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <style>
+    body {
+      background: #0f0f0f;
+      color: white;
+      font-family: Arial;
+      text-align: center;
+    }
+
+    .container {
+      padding: 40px;
+    }
+
+    .search-box,
+    .upload-box {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .search-box input,
+    .upload-box input {
+      padding: 10px;
+      width: 250px;
+      border-radius: 5px;
+      border: none;
+      font-size: 16px;
+    }
+
+    .search-box button,
+    .upload-box button {
+      background: #d4af37;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .search-box button:hover,
+    .upload-box button:hover {
+      background: #b8962e;
+    }
+
+    .result-card {
+      margin-top: 30px;
+      background: #1a1a1a;
+      border: 1px solid #d4af37;
+      border-radius: 10px;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .result-images {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+
+    .result-images img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 2px solid #d4af37;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1 style="color:#d4af37">Antiqo Public Verification</h1>
+
+  <div class="container">
+
+    <!-- Serial ID Search -->
+    <div class="search-box">
+      <input type="text" id="searchId" placeholder="Enter Serial ID">
+      <button onclick="searchAntique()">Verify</button>
+    </div>
+
+     <h3 style="color:#d4af37;margin-top:30px;">OR Scan QR Code</h3>
+
+    <!-- QR Upload -->
+    <div class="upload-box">
+      <input type="file" id="qrUpload" accept="image/*">
+      <button onclick="scanUploadedQR()">Scan QR</button>
+    </div>
+
+    <div id="reader" style="width:300px;margin:auto;margin-top:20px;"></div>
+
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    // Get query param
+    function getQueryParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+
+    // Search antique by serial ID
+    async function searchAntique() {
+      const id = document.getElementById("searchId").value.trim();
+      if (!id) return alert("Enter Serial ID");
+
+      try {
+        const res = await fetch(`/api/antique/public/${id}`);
+        if (!res.ok) return alert("Antique not found");
+        const a = await res.json();
+        displayAntique(a);
+      } catch (err) {
+        console.error(err);
+        alert("Error verifying antique");
+      }
+    }
+
+    // Display antique details
+    function displayAntique(a) {
+
+      const blockchainVerified = a.blockchainId && a.txHash ? true : false;
+      const result = document.getElementById("result");
+
+      // Get logged user info
+      const role = localStorage.getItem("role");
+      const userId = localStorage.getItem("userId");
+
+      console.log("ROLE:", role);
+console.log("USERID:", userId);
+console.log("OWNERID:", a.ownerId);
+
+      // Show button only if buyer and not owner
+
+      result.innerHTML = `
+    <div class="result-card">
+      <h2 style="color:#d4af37">${a.name}</h2>
+
+      <div class="result-images">
+        <img src="${a.imageUrl}">
+      </div>
+
+      <p><b>Category:</b> ${a.category || "-"}</p>
+      <p><b>Origin:</b> ${a.origin || "-"}</p>
+      <p><b>Age:</b> ${a.age || "-"}</p>
+      <p><b>Price:</b> ${a.estimatedValue ? (a.currency + " " + a.estimatedValue) : "-"}</p>
+      <p><b>Description:</b> ${a.description || "-"}</p>
+
+      <hr>
+
+      <h3 style="color:#d4af37">Verification Details</h3>
+
+      <p><b>Serial ID:</b> ${a.serialId}</p>
+
+      <p><b>Status:</b>
+        <span style="color:${a.status === "Approved" ? "#4caf50" : "orange"}">
+          ${a.status}
+        </span>
+      </p>
+
+      <p><b>Blockchain Verification:</b>
+        <span style="color:${blockchainVerified ? "#4caf50" : "red"}">
+          ${blockchainVerified ? "Verified on Blockchain ✅" : "❌ Not Verified"}
+        </span>
+      </p>
+
+      <p><b>Blockchain Tx Hash:</b> ${a.txHash || "-"}</p>
+      <p><b>Current Owner:</b> ${a.currentOwner || "Unknown"}</p>
+
+      <hr>
+
+      <h3 style="color:#d4af37">Ownership History</h3>
+
+      ${a.previousOwners && a.previousOwners.length
+          ? a.previousOwners.map(o =>
+            `<p>${o.owner?.name || ""} - ${new Date(o.transferDate).toLocaleDateString()}</p>`
+          ).join("")
+          : "<p>No previous owners</p>"
+        }
+
+
+    </div>
+  `;
+    }
+
+
+
+
+
+    // ===============================
+    // Scan uploaded QR image
+    // ===============================
+    function scanUploadedQR() {
+      const fileInput = document.getElementById("qrUpload");
+      if (!fileInput.files.length) return alert("Upload QR image first");
+      const file = fileInput.files[0];
+
+      const qr = new Html5Qrcode("reader");
+      qr.scanFile(file, true)
+        .then(decodedText => {
+          handleQRDecoded(decodedText);
+        })
+        .catch(err => {
+          console.error(err);
+          alert("QR not readable");
+        });
+    }
+
+    function handleQRDecoded(decodedText) {
+      console.log("QR Raw Data:", decodedText);
+
+      try {
+        const url = new URL(decodedText);
+        const serialId = url.searchParams.get("id");
+        if (serialId) {
+          document.getElementById("searchId").value = serialId;
+          searchAntique();
+          return;
+        }
+      } catch (e) {
+        // fallback: maybe just the serial ID text
+        const match = decodedText.match(/ANTQ-\d{4}-\d{5}/);
+        if (match) {
+          document.getElementById("searchId").value = match[0];
+          searchAntique();
+        } else {
+          alert("QR is invalid or does not contain a serial ID");
+        }
+      }
+    }
+
+    // Auto-load if ?id=SERIAL_ID
+    window.addEventListener("DOMContentLoaded", () => {
+      const serialId = getQueryParam("id");
+      if (serialId) {
+        document.getElementById("searchId").value = serialId;
+        searchAntique();
+      }
+    });
+  </script>
+
+</body>
+
+</html>                                                                 

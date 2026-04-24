@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Buyer Profile - Antiqo</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial, sans-serif;
+background:#0d0d0d;
+color:white;
+}
+
+h2{
+color:#d4af37;
+}
+
+.container{
+padding:30px;
+}
+
+.profile-row{
+margin-bottom:18px;
+font-size:15px;
+}
+
+.label{
+color:#aaa;
+margin-bottom:4px;
+}
+
+.value{
+font-size:17px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h2>Buyer Profile</h2>
+
+<div class="container">
+
+<div class="profile-row">
+<div class="label">Name</div>
+<div class="value" id="name">Loading...</div>
+</div>
+
+<div class="profile-row">
+<div class="label">Email</div>
+<div class="value" id="email">Loading...</div>
+</div>
+
+<div class="profile-row">
+<div class="label">Role</div>
+<div class="value" id="role">Loading...</div>
+</div>
+
+<div class="profile-row">
+<div class="label">Account Created</div>
+<div class="value" id="created">Loading...</div>
+</div>
+
+</div>
+
+<script>
+
+
+if(!token){
+alert("Please login first");
+window.location.href="/login.html";
+}
+
+async function loadbuyerProfile(){
+
+try{
+
+const res = await fetch("/api/auth/profile",{
+headers:{
+Authorization:"Bearer "+token
+}
+});
+
+const data = await res.json();
+
+console.log("PROFILE DATA:", data);
+
+document.getElementById("name").innerText = data.name || "-";
+document.getElementById("email").innerText = data.email || "-";
+document.getElementById("role").innerText = data.role || "Buyer";
+
+const date = new Date(data.createdAt);
+document.getElementById("created").innerText = date.toDateString();
+
+}catch(err){
+
+console.error(err);
+alert("Error loading profile");
+
+}
+
+}
+
+loadbuyerProfile();
+
+</script>
+
+</body>
+</html>

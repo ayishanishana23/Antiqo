@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+<head>
+    <title>Browse Antique - Antiqo</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+    <div class="browse-container">
+        <h2 style="color:#d4af37;">Browse Antiques</h2>
+        <input type="text" id="searchInput" placeholder="Search by name, tags, period, material, origin"
+            style="width:100%;padding:12px;margin:15px 0;border-radius:6px;border:2px solid #d4af37;font-size:14px;">
+        <div id="antiquesGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;">
+        </div>
+        <!-- Antique Detail Modal -->
+        <div id="antiqueModal" style="
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.85);
+z-index:999;
+display:none;
+align-items:center;
+justify-content:center;
+">
+
+            <div style="
+background:#111;
+padding:20px;
+border-radius:10px;
+max-width:450px;
+width:90%;
+border:1px solid #d4af37;
+color:white;
+">
+
+                <h3 id="detailName" style="color:#d4af37;text-align:center;"></h3>
+
+                <div style="display:flex;gap:15px;flex-wrap:wrap;justify-content:center;margin-bottom:15px;">
+
+                    <img id="detailImage"
+                        style="width:150px;height:150px;object-fit:cover;border-radius:8px;border:2px solid #d4af37;">
+
+                    <div style="text-align:center;">
+
+                        <img id="detailQR"
+                            style="width:150px;height:150px;border:2px solid #d4af37;border-radius:8px"><br>
+
+                        <a id="download"
+                            style="color:#d4af37;text-decoration:underline;margin-top:5px;display:inline-block;">
+                            Download QR
+                        </a>
+
+                    </div>
+
+                </div>
+
+                <p>
+                    <b>Serial ID:</b>
+                    <span id="detailSerial"></span>
+                    <button id="copySerialBtn"
+                        style="margin-left:10px;padding:4px 8px;background:#d4af37;border:none;border-radius:4px;cursor:pointer;font-size:12px;">
+                        Copy
+                    </button>
+                </p>
+                <p><b>Owner:</b> <span id="detailOwner"></span></p>
+
+                <div style="text-align:center;margin-top:15px;">
+                    <button onclick="closeModal()"
+                        style="margin-left:10px;padding:10px 16px;background:#444;border:none;border-radius:5px;color:white;cursor:pointer;">
+                        Close
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <script>
+
+        // Load all antiques initially
+        async function loadAntiques(query = "") {
+            try {
+
+                const url = query
+                    ? `/api/antique/browse?q=${encodeURIComponent(query)}`
+                    : `/api/antique/browse`;
+
+                const token = localStorage.getItem("token");
+
+                const res = await fetch(url, {
+                    headers: { Authorization: "Bearer " + token }
+                });
+
+                if (!res.ok) throw new Error("API error");
+
+                const antiques = await res.json();
+
+                const grid = document.getElementById("antiquesGrid");
+                grid.innerHTML = "";
+
+                if (!antiques || antiques.length === 0) {
+                    grid.innerHTML = "<p style='color:#aaa;'>No antiques found.</p>";
+                    return;
+                }
+
+                antiques.forEach(a => {
+
+                    const div = document.createElement("div");
+                    div.style.cursor = "pointer";
+                    div.style.border = "2px solid #d4af37";
+                    div.style.borderRadius = "6px";
+                    div.style.overflow = "hidden";
+                    div.style.textAlign = "center";
+                    div.style.background = "#111";
+                    div.style.transition = "0.2s";
+
+                    div.onmouseover = () => div.style.transform = "scale(1.03)";
+                    div.onmouseout = () => div.style.transform = "scale(1)";
+
+                    const img = document.createElement("img");
+                    img.src = a.imageUrl || "/images/default-antique.jpg";
+                    img.style.width = "100%";
+                    img.style.height = "150px";
+                    img.style.objectFit = "cover";
+
+                    const name = document.createElement("p");
+                    name.innerText = a.name || "Unknown";
+                    name.style.margin = "5px 0";
+                    name.style.color = "#d4af37";
+
+                    const sale = document.createElement("p");
+
+                    sale.innerText = a.isForSale ? "For Sale" : "Not For Sale";
+
+                    sale.style.color = a.isForSale ? "limegreen" : "gray";
+                    sale.style.fontSize = "12px";
+                    sale.style.marginBottom = "8px";
+
+                    div.appendChild(img);
+                    div.appendChild(name);
+                    div.appendChild(sale);
+                    grid.appendChild(div);
+
+                    div.onclick = () => showDetail(a);
+
+                });
+
+            } catch (err) {
+                console.error("Browse error:", err);
+            }
+        }
+
+
+        // Show antique details
+        function showDetail(a) {
+            const modal = document.getElementById("antiqueModal");
+            modal.style.display = "flex";
+
+            document.getElementById("detailName").innerText = a.name || "-";
+            document.getElementById("detailSerial").innerText = a.serialId || "-";
+            document.getElementById("detailOwner").innerText = a.ownerName || "Unknown";
+
+            // ---------- Antique Image ----------
+            const img = document.getElementById("detailImage");
+            img.src = a.imageUrl
+                ? `http://localhost:5000${a.imageUrl}` // serve from server
+                : "/images/default-antique.jpg";
+
+            // ---------- QR Image ----------
+            const qr = document.getElementById("detailQR");
+            qr.src = a.qrCode || "/images/no-qr.png"; // use base64 directly
+
+            // ---------- QR Download ----------
+            const download = document.getElementById("download"); // fixed ID
+            if (a.qrCode) {
+                download.href = a.qrCode; // base64 can be downloaded directly
+                download.download = `${a.serialId}_QR.png`;
+            } else {
+                download.href = "#";
+            }
+            // ---------- Copy Serial ID ----------
+            const copyBtn = document.getElementById("copySerialBtn");
+            copyBtn.onclick = () => {
+                const serial = a.serialId || "";
+                if (serial) {
+                    navigator.clipboard.writeText(serial)
+                        .then(() => alert("Serial ID copied to clipboard!"))
+                        .catch(err => console.error("Copy failed", err));
+                }
+            };
+
+
+
+        }
+
+
+        // Search functionality
+        document.getElementById("searchInput").addEventListener("input", (e) => {
+            loadAntiques(e.target.value.trim());
+        });
+
+        function closeModal() {
+            document.getElementById("antiqueModal").style.display = "none";
+        }
+
+        // Initial load
+        loadAntiques();
+
+    </script>
+</body>
+
+</html>

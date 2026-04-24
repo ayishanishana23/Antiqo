@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>My Ownership Requests - Antiqo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- QR Library -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+
+<body>
+
+ <div class="info-box">
+
+<h2 style="color:#d4af37;">My Ownership Requests</h2>
+
+<p style="opacity:0.8;margin-bottom:20px;">
+Track the ownership requests you have sent to antique owners.
+</p>
+<div id="requestList"></div>
+</div>
+<div class="info-box">
+  <h2 style="color:#d4af37;margin-top:40px;">
+Ownership Requests Received
+</h2>
+
+<p style="opacity:0.8;margin-bottom:20px;">
+Requests from buyers who want to purchase your antiques.
+</p>
+
+<div id="receivedRequestList"></div>
+</div>
+
+<script>
+
+async function loadOwnershipRequests(){
+
+const token = localStorage.getItem("token");
+
+try{
+
+const res = await fetch("/api/antique/my-ownership-requests",{
+headers:{ Authorization:"Bearer "+token }
+});
+
+const requests = await res.json();
+
+const container = document.getElementById("requestList");
+
+if(requests.length === 0){
+
+container.innerHTML = `<p>No ownership requests sent</p>`;
+return;
+
+}
+
+container.innerHTML = requests.map(r => `
+
+<div style="
+background:#111;
+padding:20px;
+border-radius:8px;
+margin-bottom:15px;
+border-left:4px solid #d4af37;
+">
+
+<h3 style="color:#d4af37">${r.antique.name}</h3>
+
+<p><b>Serial ID:</b> ${r.antique.serialId}</p>
+<p><b>Owner:</b> ${r.owner.name}</p>
+<p><b>Status:</b> ${r.status}</p>
+
+</div>
+
+`).join("");
+
+}catch(err){
+
+console.error(err);
+alert("Failed to load requests");
+
+}
+
+}
+
+
+async function loadReceivedRequests(){
+
+const token = localStorage.getItem("token");
+
+const container = document.getElementById("receivedRequestList");
+
+try{
+
+const res = await fetch("/api/antique/owner-requests",{
+headers:{ Authorization:"Bearer "+token }
+});
+
+const requests = await res.json();
+
+if(!requests.length){
+
+container.innerHTML = "<p>No ownership requests received</p>";
+return;
+
+}
+
+container.innerHTML = requests.map(r => `
+
+<div style="
+background:#111;
+padding:20px;
+border-radius:8px;
+margin-bottom:15px;
+border-left:4px solid #d4af37;
+">
+
+<h3 style="color:#d4af37">${r.antique.name}</h3>
+
+<p><b>Serial ID:</b> ${r.antique.serialId}</p>
+<p><b>Buyer:</b> ${r.buyer.name}</p>
+<p><b>Status:</b> ${r.status}</p>
+
+<button onclick="respondRequest('${r._id}',true)"
+style="margin-right:10px;padding:6px 12px;background:#4caf50;color:black;border:none;border-radius:4px;">
+Approve
+</button>
+
+<button onclick="respondRequest('${r._id}',false)"
+style="padding:6px 12px;background:#b22222;color:white;border:none;border-radius:4px;">
+Reject
+</button>
+
+</div>
+
+`).join("");
+
+}catch(err){
+
+console.error(err);
+container.innerHTML = "<p>Failed to load received requests</p>";
+
+}
+
+}
+
+
+async function respondRequest(requestId,approve){
+
+if(!confirm(`Are you sure you want to ${approve ? "approve" : "reject"} this request?`)) return;
+
+const token = localStorage.getItem("token");
+
+try{
+
+const res = await fetch("/api/antique/ownership-request/owner-response",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+token
+},
+
+body:JSON.stringify({requestId,approve})
+
+});
+
+const data = await res.json();
+
+if(!res.ok) throw new Error(data.message);
+
+alert(data.message);
+
+loadReceivedRequests();
+
+}catch(err){
+
+console.error(err);
+alert("Failed to respond");
+
+}
+
+}
+
+
+// load both sections
+loadOwnershipRequests();
+loadReceivedRequests();
+
+</script>
+
+</body>
+
+</html>
