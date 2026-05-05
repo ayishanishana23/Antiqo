@@ -1,0 +1,147 @@
+<div class="section">
+
+  <h1 style="color:#d4af37;">Settings</h1>
+
+
+  <!-- DELETE ACCOUNT BOX -->
+  <div class="info-box" style="border-left:4px solid #b22222; margin-top: 20px;">
+
+    <h2 style="color:#ff4d4d;">Delete Account</h2>
+
+    <p style="line-height:1.7;margin-top:10px;">
+      Deleting your account is permanent and cannot be undone. 
+      All your antiques and ownership records will be removed.
+    </p>
+
+    <button onclick="openDeleteModal()" 
+      style="
+      margin-top:15px;
+      padding:10px 15px;
+      background:#b22222;
+      border:none;
+      color:white;
+      border-radius:6px;
+      cursor:pointer;
+      ">
+      Delete My Account
+    </button>
+
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div id="deleteModal" style="
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.8);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:999;
+">
+
+  <div style="
+  background:#111;
+  padding:30px;
+  border-radius:10px;
+  width:320px;
+  text-align:center;
+  ">
+
+    <h3 style="color:#ff4d4d;">Confirm Deletion</h3>
+
+    <p style="margin:15px 0;">
+      Enter your password to delete account
+    </p>
+
+    <input type="password" id="deletePassword" 
+      placeholder="Enter password"
+      style="
+      width:100%;
+      padding:10px;
+      border-radius:6px;
+      border:none;
+      margin-bottom:15px;
+      ">
+
+    <button onclick="deleteAccount()" style="
+    background:#b22222;
+    border:none;
+    padding:10px 15px;
+    color:white;
+    border-radius:6px;
+    cursor:pointer;
+    width:100%;
+    ">
+      Confirm Delete
+    </button>
+
+    <button onclick="closeDeleteModal()" style="
+    margin-top:10px;
+    background:#444;
+    border:none;
+    padding:10px;
+    color:white;
+    border-radius:6px;
+    cursor:pointer;
+    width:100%;
+    ">
+      Cancel
+    </button>
+
+  </div>
+
+</div>
+
+<script>
+
+function openDeleteModal(){
+  document.getElementById("deleteModal").style.display="flex";
+}
+
+function closeDeleteModal(){
+  document.getElementById("deleteModal").style.display="none";
+}
+
+async function deleteAccount(){
+
+  const password = document.getElementById("deletePassword").value;
+
+  if(!password){
+    alert("Please enter password");
+    return;
+  }
+
+  try{
+
+    const res = await fetch("/api/user/delete",{
+      method:"DELETE",
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer "+localStorage.getItem("token")
+      },
+      body:JSON.stringify({ password })
+    });
+
+    const data = await res.json();
+
+    alert(data.message);
+
+    if(data.success){
+      localStorage.removeItem("token");
+      window.location.href="/login.html";
+    }
+
+  }catch(err){
+    console.log(err);
+   const text = await res.text();
+    console.log(text);
+  }
+
+}
+
+</script>
