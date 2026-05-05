@@ -77,7 +77,7 @@
 
  .antiques-container {
   display: grid;
-  grid-template-rows: repeat( minmax(180px, 1fr));
+  grid-template-columns: repeat( 3, 1fr);
   gap: 20px;
   padding: 20px 0;
 }
@@ -86,7 +86,7 @@
   background-color: #1c1c1c;
   border-radius: 12px;
   padding: 10px;
-  color: #f5f5f5;
+  color: #d4af37;
   text-align: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
@@ -150,7 +150,7 @@
 
     /* ================= HERO SECTION ================= */
     .hero {
-      flex: 1;
+      min-height: 87vh;
       position: relative;
       background: url("/images/antique-bg.jpg") no-repeat center center/cover;
       display: flex;
@@ -159,6 +159,28 @@
       text-align: center;
       color: white;
     }
+
+    .hero-content h1 {
+      font-size: 60px;
+  color: #d4af37;
+  margin-bottom: 20px;
+}
+
+.hero-content p {
+  font-size: 20px;
+  opacity: 0.9;
+  margin-bottom: 20px;
+  color: #eae4cf;
+}
+
+    .hero-content {
+  min-height: 60vh;   /* makes it taller */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: 50px;
+
+}
 
     .glass-layer {
       position: relative;
@@ -172,9 +194,19 @@
       align-items: center;
       text-align: center;
 
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
     }
+
+    .glass-box {
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 15px;
+  padding: 30px;
+  margin: 30px auto;
+  max-width: 1000px;
+}
 
 
     /* Transparent Sheet */
@@ -194,12 +226,14 @@
       max-width: 800px;
       padding: 40px;
       color: white;
+      border-radius: 15px;
+      box-shadow: 0 8px 30px(0,0,0,0.6);
     }
 
 
     .content h1 {
       padding: 70px;
-      font-size: 58px;
+      font-size: 60px;
       margin-bottom: 20px;
       color: #d4af37;
       letter-spacing: 2px;
@@ -208,7 +242,7 @@
     .content p {
       font-size: 18px;
       margin-bottom: 30px;
-      line-height: 1.6;
+      line-height: 2;
     }
 
     .logo {
@@ -226,38 +260,45 @@
       object-fit: contain;
     }
 
+    .features-section {
+  margin-top: 30px;
+}
 
-    /* ================= SEARCH ================= */
-    .search-box input {
-      padding: 12px;
-      width: 250px;
-      border: none;
-      border-radius: 5px;
-      outline: none;
-    }
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-top: 20px;
+}
 
-    .search-box button {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 5px;
-      background-color: #d4af37;
-      color: black;
-      cursor: pointer;
-      margin-left: 5px;
-      font-weight: bold;
-    }
+.feature-card {
+  background: rgba(0,0,0,0.6);
+  padding: 15px;
+  border-radius: 10px;
+  border-left: 3px solid #d4af37;
+  text-align: left;
+  transition: 0.3s;
+}
 
+.feature-card:hover {
+  transform: translateY(-5px);
+}
 
-    .qr-btn {
-      margin-top: 15px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      background-color: #b8860b;
-      color: white;
-      cursor: pointer;
-      font-weight: bold;
-    }
+.feature-card h3 {
+  color: #d4af37;
+  margin-bottom: 8px;
+}
+
+.feature-card p {
+  font-size: 14px;
+  opacity: 0.9;
+  color: #eae4cf;
+}
+
+.main-section{
+  background: #3e3928;
+  
+}
 
 
     /* ================= FOOTER ================= */
@@ -313,10 +354,9 @@ document.addEventListener("DOMContentLoaded", () => {
   <!-- Hero Section -->
   <div class="hero">
 
-    <div class="overlay"></div>
+    <div class="overlay">
 
-    <div class="glass-layer">
-      <div class="content">
+      <div class="hero-content glass-box">
         <h1>Antiqo</h1>
         <p>
           Antique Verification System<br>
@@ -333,22 +373,58 @@ document.addEventListener("DOMContentLoaded", () => {
           <button class="btn btn-get-started" onclick="window.location.href='/login.html'">Get Started</button>
           <button class="btn btn-register" onclick="window.location.href='/register.html'">Register</button>
         </div>
+      </div>
+        </div>
+    </div>
+      <div class="main-section"> 
+<div class="features-section glass-box">
 
-        
+  <h2 style="color:#d4af37; margin-top:40px;">Why Choose Antiqo?</h2>
 
+  <div class="features-grid">
+
+    <div class="feature-card">
+      <h3>🔐 Blockchain Security</h3>
+      <p>All ownership data is securely stored on blockchain, ensuring tamper-proof verification.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>✔ Authentic Verification</h3>
+      <p>Each antique is verified by admin before approval, reducing fake listings.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>📱 QR Code Access</h3>
+      <p>Scan QR codes to instantly verify antique details and ownership history.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>🔁 Ownership Transfer</h3>
+      <p>Secure ownership transfer with owner and admin approval workflow.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>📊 Transparency</h3>
+      <p>View complete history of previous owners and transaction details.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>⚡ Fast & Reliable</h3>
+      <p>Efficient backend with real-time verification and smooth user experience.</p>
+    </div>
+
+  </div>
+</div>
 
 
           <!-- Admin Approved Antique List Section -->
-<div class="approved-antiques-section">
+<div class="approved-antiques-section glass-box">
   <h2>Antiques</h2>
   <div class="antiques-container" id="antiquesContainer">
     <!-- Antique cards will be injected here -->
   </div>
 </div>
-      </div>
-    </div>
-
-  </div>
+</div> 
   <!-- Footer -->
   <footer>
 
@@ -356,7 +432,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 <p>Email: support@antiqo.com</p>
 
-<p>Phone: +91 98765 43210</p>
+<p>Phone: +91 9061686734</p>
 
 <p>Address: Antiqo Technologies, Infopark Campus, Kochi, Kerala, India</p>
 
